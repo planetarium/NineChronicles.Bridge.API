@@ -1,0 +1,33 @@
+name: Build & Lint
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3.6.0
+        with:
+          submodules: recursive
+      - uses: actions/setup-node@v3.8.1
+        with:
+          node-version: 20
+          cache: 'yarn'
+
+      - name: Install
+        shell: bash
+        run: yarn install --immutable
+
+      - name: Codegen
+        run: yarn codegen
+
+      - name: Build
+        run: yarn build
+
+      - name: Lint
+        run: yarn lint
