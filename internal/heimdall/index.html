@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Event Details Viewer</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <script>
+        const HOST = "http://k8s-heimdall-bridgese-47caeced23-9bee66a031b7290c.elb.us-east-2.amazonaws.com";
+        function fetchEventData() {
+            var txid = document.getElementById('txid').value;
+            fetch(`${HOST}/events/${txid}`)
+                .then(response => response.json())
+                .then(data => {
+                    displayData(data);
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    document.getElementById('result').innerHTML = `<p class="text-red-500">${error}</p>`;
+                });
+            return false;
+        }
+
+        function displayData(data) {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = ''; // Clear previous results
+            for (const key in data) {
+                const value = data[key];
+                const fieldDiv = document.createElement('div');
+                fieldDiv.classList.add('mb-4', 'p-2', 'border', 'border-gray-200', 'rounded');
+                if (Array.isArray(value)) {
+                    // Special handling for array fields like 'responses'
+                    fieldDiv.innerHTML = `<label class="font-bold">${key}:</label>`;
+                    value.forEach(item => {
+                        const itemDiv = document.createElement('div');
+                        itemDiv.classList.add('ml-4');
+                        itemDiv.innerHTML = `<pre>${JSON.stringify(item, null, 2)}</pre>`;
+                        fieldDiv.appendChild(itemDiv);
+                    });
+                } else {
+                    // Regular fields
+                    fieldDiv.innerHTML = `<label class="font-bold">${key}:</label> <pre>${JSON.stringify(value, null, 2)}</pre>`;
+                }
+                resultDiv.appendChild(fieldDiv);
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-100 p-8">
+    <div class="container mx-auto bg-white p-6 rounded shadow">
+        <h1 class="text-xl font-bold mb-4">Event Details Viewer</h1>
+        <form onsubmit="return fetchEventData()" class="mb-4">
+            <label for="txid" class="block mb-2">Enter Transaction ID:</label>
+            <input type="text" id="txid" name="txid" class="border border-gray-300 p-2 rounded w-full mb-4">
+            <input type="submit" value="Fetch Event Data" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+        </form>
+        <div id="result"></div>
+    </div>
+</body>
+</html>
