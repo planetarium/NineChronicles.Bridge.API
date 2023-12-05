@@ -1,4 +1,4 @@
-import { Controller, Get, Param } from '@nestjs/common';
+import { Controller, Get, NotFoundException, Param } from '@nestjs/common';
 import { EventService } from './event.service';
 
 @Controller('events')
@@ -11,7 +11,12 @@ export class EventController {
   }
 
   @Get(':id')
-  getEvent(@Param('id') id: string) {
-    return this.eventService.getEvent(id);
+  async getEvent(@Param('id') id: string) {
+    const event = await this.eventService.getEvent(id);
+    if (event === null) {
+      throw new NotFoundException();
+    }
+
+    return event;
   }
 }
