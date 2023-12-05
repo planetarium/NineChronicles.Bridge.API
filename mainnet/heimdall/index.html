@@ -4,7 +4,7 @@
     <title>Event Details Viewer</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <script>
-        const HOST = "http://k8s-heimdall-bridgese-32547980c9-02feff637f39b673.elb.us-east-2.amazonaws.com";
+        const HOST = "https://heimdall-main-bridge-service-api.planetarium.dev";
         function fetchEventData() {
             var txid = document.getElementById('txid').value;
             fetch(`${HOST}/events/${txid}`)
