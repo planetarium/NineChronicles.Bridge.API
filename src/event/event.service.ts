@@ -60,6 +60,7 @@ function convert(x: RequestTransactionWithExecutions) {
 function convertResponseTransaction(x: ResponseTransaction) {
   return {
     ...x,
+    raw: x.raw.toString('hex'),
     nonce: Number(x.nonce), // JSON doesn't support bigint.
   };
 }
