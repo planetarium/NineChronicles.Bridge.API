@@ -1,5 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { RequestTransaction, ResponseTransaction } from '@prisma/client';
+import { Event } from './event.entity';
+import { plainToClass } from 'class-transformer';
 import { PrismaService } from 'src/prisma/prisma.service';
 
 const PAGE = 50;
@@ -16,7 +18,7 @@ export class EventService {
 
   constructor(private readonly prismaService: PrismaService) {}
 
-  async getEvents() {
+  async getEvents(): Promise<Event[]> {
     const resp = await this.prismaService.requestTransaction.findMany({
       orderBy: {
         createdAt: 'desc',
@@ -27,10 +29,10 @@ export class EventService {
       },
     });
 
-    return resp.map(convert);
+    return resp.map(convert) as Event[];
   }
 
-  async getEvent(requestTxId: string) {
+  async getEvent(requestTxId: string): Promise<Event | null> {
     return convert(
       await this.prismaService.requestTransaction.findUnique({
         where: {
@@ -44,17 +46,17 @@ export class EventService {
   }
 }
 
-function convert(x: RequestTransactionWithExecutions) {
+function convert(x: RequestTransactionWithExecutions): Event | null {
   if (x === null || x === undefined) {
     return x;
   }
 
-  return {
+  return plainToClass(Event, {
     ...x,
     blockIndex: Number(x.blockIndex), // JSON doesn't support bigint.
     executions: undefined,
     responses: x.executions.map(convertResponseTransaction),
-  };
+  });
 }
 
 function convertResponseTransaction(x: ResponseTransaction) {
