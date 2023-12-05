@@ -27,11 +27,11 @@ export class EventService {
       },
     });
 
-    return resp.map(renameExecutions);
+    return resp.map(convert);
   }
 
   async getEvent(requestTxId: string) {
-    return renameExecutions(
+    return convert(
       await this.prismaService.requestTransaction.findUnique({
         where: {
           id: requestTxId,
@@ -44,14 +44,22 @@ export class EventService {
   }
 }
 
-function renameExecutions(x: RequestTransactionWithExecutions) {
+function convert(x: RequestTransactionWithExecutions) {
   if (x === null || x === undefined) {
     return x;
   }
 
   return {
     ...x,
+    blockIndex: Number(x.blockIndex), // JSON doesn't support bigint.
     executions: undefined,
-    responses: x.executions,
+    responses: x.executions.map(convertResponseTransaction),
+  };
+}
+
+function convertResponseTransaction(x: ResponseTransaction) {
+  return {
+    ...x,
+    nonce: Number(x.nonce), // JSON doesn't support bigint.
   };
 }
